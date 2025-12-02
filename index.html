@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Entropy Calculator</title>
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin:0; padding:0;
+            background: url('https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.peakpx.com%2Fen%2Fhd-wallpaper-desktop-ezedk&psig=AOvVaw2ppL7ch9Ml-lupfFfLrhqA&ust=1764760155202000&source=images&cd=vfe&opi=89978449&ved=0CBUQjRxqFwoTCPC0woPinpEDFQAAAAAdAAAAABAE') no-repeat center center fixed;
+            background-size: cover;
+        }
+        h1 { text-align: center; color: #ffffff; padding: 20px 0; text-shadow: 1px 1px 4px #000000; }
+        .tabs { display: flex; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-button { padding: 10px 20px; cursor: pointer; border: none; outline: none; background: rgba(217,225,242,0.8); margin: 2px; border-radius: 5px; transition: background 0.2s; font-weight: bold;}
+        .tab-button.active { background: #1a3d7c; color: white; }
+        .tab-content { display: none; max-width: 600px; margin: auto; background: rgba(255,255,255,0.85); padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.25);}
+        .tab-content.active { display: block; }
+        label { display: block; margin-top: 10px; color: #1a3d7c; }
+        input, select { padding: 6px; margin-top: 5px; width: 150px; border-radius: 4px; border: 1px solid #ccc; }
+        button { margin-top: 15px; padding: 8px 12px; cursor: pointer; border-radius: 4px; background: #1a3d7c; color:white; border:none; }
+        pre { background: #eaeaea; padding: 10px; border-radius: 5px; margin-top: 10px;}
+    </style>
+</head>
+<body>
+
+<h1>Entropy Change Calculator</h1>
+
+<div class="tabs">
+    <button class="tab-button active" onclick="showTab('phase')">Phase Change</button>
+    <button class="tab-button" onclick="showTab('heating')">Heating</button>
+    <button class="tab-button" onclick="showTab('expansion')">Expansion</button>
+    <button class="tab-button" onclick="showTab('spontaneity')">Spontaneity</button>
+</div>
+
+<!-- PHASE CHANGE TAB -->
+<div id="phase" class="tab-content active">
+    <label>Enthalpy ΔH (kJ/mol):</label>
+    <input id="ph_dh" type="number">
+    <label>Temperature:</label>
+    <input id="ph_t" type="number">
+    <select id="ph_unit">
+        <option value="Celsius">Celsius</option>
+        <option value="Kelvin">Kelvin</option>
+    </select>
+    <button onclick="calc_phase()">Calculate ΔS</button>
+    <pre id="ph_result"></pre>
+</div>
+
+<!-- HEATING TAB -->
+<div id="heating" class="tab-content">
+    <label>Moles (n):</label>
+    <input id="heat_n" type="number">
+    <label>Heat Capacity C (J/mol·K):</label>
+    <input id="heat_c" type="number">
+    <label>Initial Temp T₁:</label>
+    <input id="heat_t1" type="number">
+    <label>Final Temp T₂:</label>
+    <input id="heat_t2" type="number">
+    <label>Unit:</label>
+    <select id="heat_unit">
+        <option value="Celsius">Celsius</option>
+        <option value="Kelvin">Kelvin</option>
+    </select>
+    <button onclick="calc_heating()">Calculate ΔS</button>
+    <pre id="heat_result"></pre>
+</div>
+
+<!-- EXPANSION TAB -->
+<div id="expansion" class="tab-content">
+    <label>Moles (n):</label>
+    <input id="exp_n" type="number">
+    <label>Initial Volume V₁:</label>
+    <input id="exp_v1" type="number">
+    <label>Final Volume V₂:</label>
+    <input id="exp_v2" type="number">
+    <button onclick="calc_expansion()">Calculate ΔS</button>
+    <pre id="exp_result"></pre>
+</div>
+
+<!-- SPONTANEITY TAB -->
+<div id="spontaneity" class="tab-content">
+    <label>ΔH (kJ):</label>
+    <input id="spon_dh" type="number">
+    <label>ΔS (J/K):</label>
+    <input id="spon_ds" type="number">
+    <label>Temperature:</label>
+    <input id="spon_t" type="number">
+    <select id="spon_unit">
+        <option value="Celsius">Celsius</option>
+        <option value="Kelvin">Kelvin</option>
+    </select>
+    <button onclick="calc_spontaneity()">Check Spontaneity</button>
+    <pre id="spon_result"></pre>
+</div>
+
+<script>
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    const R = 8.314;
+
+    function toKelvin(temp, unit) {
+        return unit === 'Celsius' ? parseFloat(temp)+273.15 : parseFloat(temp);
+    }
+
+    function calc_phase() {
+        let dh = parseFloat(document.getElementById('ph_dh').value);
+        let t = parseFloat(document.getElementById('ph_t').value);
+        let unit = document.getElementById('ph_unit').value;
+        if(isNaN(dh)||isNaN(t)){alert("Enter valid numbers"); return;}
+        let t_k = toKelvin(t, unit);
+        let ds = dh*1000/t_k;
+        document.getElementById('ph_result').innerText = `ΔS = ${ds.toFixed(4)} J/(mol·K)`;
+    }
+
+    function calc_heating() {
+        let n=parseFloat(document.getElementById('heat_n').value);
+        let c=parseFloat(document.getElementById('heat_c').value);
+        let t1=parseFloat(document.getElementById('heat_t1').value);
+        let t2=parseFloat(document.getElementById('heat_t2').value);
+        let unit=document.getElementById('heat_unit').value;
+        if([n,c,t1,t2].some(v=>isNaN(v))){alert("Invalid input"); return;}
+        let T1=toKelvin(t1, unit), T2=toKelvin(t2, unit);
+        let ds = n*c*Math.log(T2/T1);
+        document.getElementById('heat_result').innerText = `ΔS = ${ds.toFixed(4)} J/K`;
+    }
+
+    function calc_expansion() {
+        let n=parseFloat(document.getElementById('exp_n').value);
+        let v1=parseFloat(document.getElementById('exp_v1').value);
+        let v2=parseFloat(document.getElementById('exp_v2').value);
+        if([n,v1,v2].some(v=>isNaN(v)||v<=0)){alert("Volumes must be positive"); return;}
+        let ds = n*R*Math.log(v2/v1);
+        document.getElementById('exp_result').innerText = `ΔS = ${ds.toFixed(4)} J/K`;
+    }
+
+    function calc_spontaneity() {
+        let dh=parseFloat(document.getElementById('spon_dh').value)*1000;
+        let ds=parseFloat(document.getElementById('spon_ds').value);
+        let t=parseFloat(document.getElementById('spon_t').value);
+        let unit=document.getElementById('spon_unit').value;
+        if([dh,ds,t].some(v=>isNaN(v))){alert("Invalid input"); return;}
+        let T=toKelvin(t, unit);
+        let dg = dh - T*ds;
+        let status="";
+        if(dg<0){status="SPONTANEOUS";} 
+        else if(dg>0){status="NON-SPONTANEOUS";} 
+        else {status="EQUILIBRIUM";}
+        document.getElementById('spon_result').innerText = `ΔG = ${dg.toFixed(2)} J\nStatus: ${status}`;
+    }
+</script>
+
+</body>
+</html>
