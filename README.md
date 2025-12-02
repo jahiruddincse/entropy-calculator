@@ -27,7 +27,7 @@ The calculator is fully **interactive**, works in any browser, and is mobile-fri
 
 ## 🛠️ Technologies Used
 
-- HTML, CSS, JavaScript  
+- HTML, CSS
 - Deployed on **Netlify** for instant access  
 - Can be hosted on **GitHub Pages** as well  
 
